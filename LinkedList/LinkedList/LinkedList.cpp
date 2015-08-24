@@ -3,8 +3,8 @@ Kenneth Adair
 www.cslearner.com
 This will be a sample single linked list example for Github.
 
-This specific commit contains the creation of the "node" struct which is what our linked list will interact with.
-Additionally in the "main" it contains sample syntax that we will be using as we interact with our node struct in the Linked List class.  
+This specific commit is the node again but this time it is implemented with a class instead of a structure.  
+I find this version of the node more tedious to interact with so I will most likely be going back to the structure version of nodes.
 */
 
 //Input and output stream
@@ -15,31 +15,64 @@ Additionally in the "main" it contains sample syntax that we will be using as we
 using namespace std;
 
 //Data structures interact with the "node" structure which contains a piece of information or data and pointers that point to other nodes.
-struct node{
+//the "template<class T>" allows this node to be any data type we'd like.  We can create linked lists of strings, integers, or any other data type we'd like now
+template<class T>
+class node{
+//private means that only instances of the class can access its own data.
+private:
+	//The "T" means it can be any data type such as String, Integer, Double, or even instances of classes
+	T Data;
+	//This is a pointer that stores the address of the next node.
+	node<T>* Next;
 public:
-	int data;
-	node* next;
+
+	//constructor with no inputs.  
+	node(){
+		//Setting a pointer to 0 makes it null
+		Next = 0; 
+	}
+
+	//constructor with inputted data
+	node(T input){ 
+		//This updates the data to be equal to the user's input
+		Data = input; 
+		//Setting a pointer to 0 makes it null
+		Next = 0; 
+	}
+
+	//accessors
+	//When I type "nodeName.data() = 5;" it can update the value of the node to be 5.
+	//When I type "nodeName.data()" it will return the value of the node
+	T& data(){
+		return Data;
+	}
+
+	//When I type "nodeName.next() = &nodeName" it sets the "next" pointer to point to the "nodeName" address
+	//When I type "nodeName.next()" it will return the address/pointer of the "next" node
+	node<T>*& next(){
+		return Next;
+	}
 };
 
+
 int main(){
+	//Creating three nodes: a, b, c.  They have values of 10, 15, and 20 respectively
+	node<int> a(10), b(15), c(20);
 
-	//Created a new node similar to how we create other variables.
-	node sample;
+	//This allows me to change the value of a
+	a.data() = 5;
 
-	//Updated the node's data to equal 10
-	sample.data = 10;
+	//This sets the a node's "next" pointer to point to the "b" node
+	a.next() = &b;
 
-	//Created a pointer that points to nodes. 
-	node* pointer;
+	//This sets the b node's "next" pointer to point to the "c" node
+	b.next() = &c;
 
-	//Assigned the pointer that points to the address of our sample node
-	pointer = &sample;
+	//Going to print the contents of each of the nodes:
+	cout << "Node a contains: " << a.data() << endl;
+	cout << "Node b contains: " << b.data() << endl;
+	cout << "Node c contains: " << c.data() << endl;
 
-	//Updated the node's "next" pointer to be equal to the "pointer" pointer.  
-	//Right now it just points to itself but this demonstrates the syntax of interacting with the node.
-	sample.next = pointer;
-
-	cout << "This will be my singly linked list example on Github" << endl;
 	_getch();
 	return 0;
 }
