@@ -1,13 +1,35 @@
 /*
 Kenneth Adair
 www.cslearner.com
-This will be a sample single linked list example for Github.
 
-In this specific commit I have worked on the linked list some more and have completed two methods that
-let me add nodes to the front or back of the linked list.  Additionally I have set up the enumerate function
-to allow me to display every node in the list.  The constructor and destructor both work as well.  
-HOWEVER I still don't have delete methods and I can't insert the nodes into specific spots.  
-My goal is to work on these next.
+Imagine that Little Timmy has an array with 5 spots in it to store his 5 friends.  He gets a new friend one day.
+Little Timmy sighs and pulls out a shotgun.  Since there are only 5 spots he has to either make a new larger array and move
+every single person to the new array or he has to kill one of his existing friends to open up a spot for his new friend.  
+Little Timmy is on a budget so he can't afford to make a new array.  As Little Timmy approaches his array he hears a voice from
+the Data Structure Wizard: 
+"What if I told you there's a better way?"
+"How?"
+"Instead of an array you could use a linked list to store your friends.  
+Linked lists allow you to insert friends, remove friends, and enumerate friends freely.
+You wouldn't have to use your shotgun on your old friends every time you got new friends!"
+"Wow that sounds awesome!  I could really expand or shrink the linked list whenever I wanted?"
+"Yup, any time you insert a new friend the linked list just magically creates more room and any
+time you remove a friend it magically shrinkst he linked list so it always takes the bare minimum 
+amount of room unlike those dirty nasty arrays."
+"Wow I'm in!"
+Then Little Timmy bought a Linked List from his friend the Data Structure Wizard and he never viciously murdered
+his friends because he ran out of room ever again.  
+The end.  
+
+This is a singly unordered linked list in C++.  A linked list is a linear list of nodes in which the order depends by the 
+pointers in the individual nodes.  A linked list is similar to an array but much more versatile.  
+
+Big O notation of linked list:
+(Taken from http://bigocheatsheet.com/)
+Access: O(n)
+Search: O(n)
+Insertion: O(1)
+Deletion: O(1)
 */
 
 //Input and output stream
@@ -45,15 +67,19 @@ public:
 	~linkedList();	//destructor
 	void addFront(const T& value);	//Adds a node to the front of the linked list
 	void addEnd(const T& value);	//Adds a node to the end of the linked list
-	void remove(int position);
+	void addAt(const int position, const T& value);	//Adds a node to a specific place in the linked list
+	T displayValue(const int position);	//returns the value from a specific node at a specific position in the linked list
+	T operator[](const int position);	//this overloads the square brackets.  The method/behavior is identical to the displayValue method
+	void remove(int position);	//removes a node from a specific point
 	void find(T value);	//Checks the linked list to see if it contains a specific value
-	void enumerate();	//outputs all the contents of the linked list
+	void enumerate();	//outputs all the contents of the linked list using pointers
 private:
 	node<T>* front;	//this pointer points to the node at the front
 	node<T>* end;	//this pointer points to the last node
 	int count;		//This tracks how many nodes are in our linked list	
 };
 
+//constructor
 template<typename T>
 linkedList<T>::linkedList(){
 	//To set a pointer to null you can either make it = 0 or make it = NULL
@@ -62,6 +88,7 @@ linkedList<T>::linkedList(){
 	count = 0;
 }
 
+//destructor
 template<typename T>
 linkedList<T>::~linkedList(){
 	
@@ -75,6 +102,7 @@ linkedList<T>::~linkedList(){
 	count = 0;
 }
 
+//A method that adds a node to the front of the linked list
 template<typename T>
 void linkedList<T>::addFront(const T& value){
 
@@ -92,6 +120,7 @@ void linkedList<T>::addFront(const T& value){
 	}
 }
 
+//A method that adds a node to the end of the linked list
 template<typename T>
 void linkedList<T>::addEnd(const T& value){
 	//Create the new node with the data being equal to the inputted value
@@ -114,6 +143,189 @@ void linkedList<T>::addEnd(const T& value){
 }
 
 template<typename T>
+void linkedList<T>::addAt(const int position, const T& value){
+	//If the index is negative or too big throw an error
+	if (position < 0 || position > count){
+		return;
+	}//If the position is the front node just call addFront 
+	else if (position == 0){
+		addFront(value);
+	}//If the position is the end node just call addEnd
+	else if (position == count){
+		addEnd(value);
+	}//Otherwise here is the default case of inserting the node somewhere in the middle
+	else{
+		//This pointer tracks which node we're currently on
+		node<T>* currentNode = front;
+		//This pointer tracks the node behind the node we're currently on.  Initialized to null.  
+		node<T>* previousNode = 0;
+		//This position counter will track which index we're currently on while going through the linkedlist
+		int currentPosition = 0;
+		//This loop moves our pointers until we're at the correct index/position we want to insert our node at.
+		//When we arrive the previousNode pointer will point to the node behind the node we're inserting
+		//and the currentNode will point to the node after the node we're inserting
+		while (currentPosition < position){
+			//updates previous node pointer to be the current node
+			previousNode = currentNode;
+			//updates the current node pointer to point to the next node we're looking at
+			currentNode = currentNode->next;
+			//updates the current position counter to the new node
+			currentPosition++;
+		}
+		//Create the new node we're going to insert
+		node<T>* myNode = new node < T > ;
+		//update the new node's value
+		myNode->data = value;
+		//Update the new node's pointer to point to the next node
+		myNode->next = currentNode;
+		//update the previous node's pointer to point to the new node rather than the old current node
+		previousNode->next = myNode;
+		//updates our temporary pointers to null to avoid bugs
+		currentNode = 0;
+		previousNode = 0;
+		//update count because we have a new node
+		count++;
+		return;
+	}
+}
+
+template <typename T>
+T linkedList<T>::displayValue(const int position){
+	//If the index doesn't exist throw an error
+	if (position < 0 || position > count){
+		throw 1;
+	}//If the index is correct loop to the correct location and retrieve the information.
+	else{
+		//A pointer to track which node we're currently on
+		node<T>* currentNode = front;
+		//This is a counter that tracks which node index/position we've looped to thus far
+		int currentPosition = 0;
+		//This loop loops us to the correct node we want to return the information for
+		while (currentPosition < position){
+			//update the pointer to point to the next node in the chain
+			currentNode = currentNode->next;
+			//update the index/position
+			currentPosition++;
+		}
+		//return the information in the node
+		return currentNode->data;
+	}
+}
+
+//This overloads the square brackets so we can access information in the linked list like this: myLinkedList[4];
+template<typename T>
+T linkedList<T>::operator[](const int position){
+	return displayValue(position);
+}
+
+template<typename T>
+void linkedList<T>::remove(const int position){
+	//If they try to remove a node that is out of bounds then do nothing
+	if (position < 0 || position > count){
+		//return exits the method without doing anything
+		return;
+	}//If they try to remove a node and the first pointer is null (the linked list is empty) then do nothing
+	else if (front == 0){
+		//return exists the method without doing anything
+		return;
+	}//If there is only one node in the linked list
+	else if (front == end){
+		//delete the first/front node
+		delete front;
+		//set the front/first pointer to null
+		front = 0;
+		//set the last/end pointer to null
+		end = 0;
+		//decrement the counter back to 0
+		count--;
+		//exit the method since we're done
+		return;
+	}//If they try to remove the last node
+	else if (position == count){
+		//This pointer will be used to track the current node we're on
+		node<T>* currentNode = front;
+		//this pointer will be used to track the node behind the node we're currently on.
+		//It's initially set to null
+		node<T>* previousNode = 0;
+		//This loop gets us to the last node and positions the previousNode pointer to the second to last node
+		while (currentNode->next != 0){
+			//update the previousNode pointer to be equal to the currentNode pointer
+			previousNode = currentNode;
+			//After updating the previousNode pointer mode the currentNode pointer forward one node
+			currentNode = currentNode->next;
+		}
+		//Since the previousNode pointer is poointing to the new LAST/END node we update the "next" pointer to be null
+		previousNode->next = 0;
+		//We delete the last node
+		delete currentNode;
+		//after deleting the last node we update the "end" pointer in our linked list to point to the new last node
+		end = previousNode;
+		//Update the "count" so that it knows we have one less node
+		count--;
+		//exit the method
+		return;
+	}//If they try to remove the first node
+	else if (position == 0){
+		//create a pointer to track the first node so we can delete it
+		node<T>* currentNode = front;
+		//update the front pointer to point to the next node since we're deleting the first one
+		front = front->next;
+		//delete the first node
+		delete currentNode;
+		//update the currentNode pointer to be null
+		currentNode = 0;
+		//update the count so it knows we have one less node
+		count--;
+	}//default scenario of a correct index/position and a linked list with multiple nodes
+	else{
+		//create a pointer "currentNode" that will track which node we're at
+		node<T>* currentNode = front;
+		//the "previousNode" pointer will point to the node before the current Node
+		node<T>* previousNode = 0;
+		//This pointer will point to the node after the current node.  
+		//All three of these pointers make it easy to delete a node and then update the "next" pointers in the node
+		node<T>* nextNode = 0;
+		//This FOR loop loops us until we get to the node we want to delete
+		for (int i = 0; i < position; i++){
+			//updates previousNode pointer to be equal to the currentNode pointer
+			previousNode = currentNode;
+			//after updating previousNode we update the currentNode pointer to the next node
+			currentNode = currentNode->next;
+		}
+		//update nextNode to be equal to the node after the node we're going to delete
+		nextNode = currentNode->next;
+		//update the previousNode's "next" pointer to point to the node after the one that we're going to delete so the linked list won't have a hole
+		previousNode->next = nextNode;
+		//deletes the target node
+		delete currentNode;
+		//updates the count so the linked list knows we have one less node
+		count--;
+	}
+}
+
+//searches the linked list and outputs a message confirming or denying 
+template<typename T>
+void linkedList<T>::find(T value){
+	//this node pointer will enable to go through the list
+	node<T>* temp;
+	//update the pointer to the first node
+	temp = front;
+	//This loop goes through the linked list and tries to find a node with a matching value
+	for (int i = 0; i < count; i++){
+		//If we find the matching data output which node it's in and exit the method
+		if (temp->data == value){
+			cout << "The value of " << value << " is in node " << i << endl;
+			return;
+		}//If we don't find the matching data at this node move to the next one
+		else{
+			temp = temp->next;
+		}
+	}//If there is no matching node inform the user.
+	cout << "Unfortunately the linked list does not contain " << value << "." << endl;
+}
+
+//A method that displays all the contents of the list
+template<typename T>
 void linkedList<T>::enumerate(){
 		node<T>* temp;
 		temp = front;
@@ -123,6 +335,7 @@ void linkedList<T>::enumerate(){
 		}
 }
 
+//Below are the simple tests of all the methods of the linked list
 int main(){
 	//constructor creates a new linkedList named "myLinkedList"
 	linkedList<int> myLinkedList;
@@ -135,7 +348,22 @@ int main(){
 	myLinkedList.addFront(19);
 	//adding 5 to the end, the list is now 19->17->15->5
 	myLinkedList.addEnd(5);
+	//Adding "10" to the 3rd position.  List is now: 19->17->10->15->5
+	myLinkedList.addAt(2, 10);
 	//enumerate displays all the contents of our linked list
+	myLinkedList.enumerate();
+	cout << myLinkedList.displayValue(0) << endl;
+	cout << myLinkedList[0] << endl;;
+	//linked list checks and confirms that the linked list contains 15
+	myLinkedList.find(15);
+	//linked list checks and denies that the linked list contains 64
+	myLinkedList.find(64);
+	//removing 10, the linked list should now read 19->17->15->5
+	myLinkedList.remove(2);
+	//This one will do nothing since -1 isn't a valid index
+	myLinkedList.remove(-1);
+	//This one will do nothing since 15 isn't a valid index
+	myLinkedList.remove(15);
 	myLinkedList.enumerate();
 
 	//destructor frees up the memory that was used by our nodes in the linked list
