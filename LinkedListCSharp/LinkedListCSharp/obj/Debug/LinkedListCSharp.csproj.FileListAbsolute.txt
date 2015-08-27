@@ -1,0 +1,2 @@
+C:\Users\Kenneth\Documents\GitHub\Data-Structures-and-Algorithms-C-plus-plus-examples\LinkedListCSharp\LinkedListCSharp\bin\Debug\LinkedListCSharp.exe.config
+C:\Users\Kenneth\Documents\GitHub\Data-Structures-and-Algorithms-C-plus-plus-examples\LinkedListCSharp\LinkedListCSharp\obj\Debug\LinkedListCSharp.csprojResolveAssemblyReference.cache
