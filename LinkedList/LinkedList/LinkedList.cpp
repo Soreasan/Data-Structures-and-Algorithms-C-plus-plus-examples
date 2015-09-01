@@ -10,11 +10,11 @@ the Data Structure Wizard:
 "What if I told you there's a better way?"
 "How?"
 "Instead of an array you could use a linked list to store your friends.  
-Linked lists allow you to insert friends, remove friends, and enumerate friends freely.
+Linked lists allow you to insert friends, removeAt friends, and enumerate friends freely.
 You wouldn't have to use your shotgun on your old friends every time you got new friends!"
 "Wow that sounds awesome!  I could really expand or shrink the linked list whenever I wanted?"
 "Yup, any time you insert a new friend the linked list just magically creates more room and any
-time you remove a friend it magically shrinkst he linked list so it always takes the bare minimum 
+time you removeAt a friend it magically shrinks the linked list so it always takes the bare minimum 
 amount of room unlike those dirty nasty arrays."
 "Wow I'm in!"
 Then Little Timmy bought a Linked List from his friend the Data Structure Wizard and he never viciously murdered
@@ -65,14 +65,29 @@ class linkedList{
 public:
 	linkedList();	//constructor
 	~linkedList();	//destructor
+
+	//Add nodes to the linked list
 	void addFront(const T& value);	//Adds a node to the front of the linked list
 	void addEnd(const T& value);	//Adds a node to the end of the linked list
 	void addAt(const int position, const T& value);	//Adds a node to a specific place in the linked list
-	T displayValue(const int position);	//returns the value from a specific node at a specific position in the linked list
-	T operator[](const int position);	//this overloads the square brackets.  The method/behavior is identical to the displayValue method
-	void remove(int position);	//removes a node from a specific point
-	void find(T value);	//Checks the linked list to see if it contains a specific value
+
+	//Returns the value of a specific node
+	T displayFront();
+	T displayEnd();
+	T displayValueAt(const int position);	//returns the value from a specific node at a specific position in the linked list
+	T operator[](const int position);	//this overloads the square brackets.  The method/behavior is identical to the displayValueAt method
+
+	//Deletes values
+	void removeFront();
+	void removeEnd();
+	void removeAt(int position);	//removeAts a node from a specific point
+
+	//Checks linked list to see if it contains a specific value
+	bool checkFor(T value);	//Checks the linked list to see if it contains a specific value
+
+	//Displays all contents of the linked list
 	void enumerate();	//outputs all the contents of the linked list using pointers
+
 private:
 	node<T>* front;	//this pointer points to the node at the front
 	node<T>* end;	//this pointer points to the last node
@@ -189,9 +204,37 @@ void linkedList<T>::addAt(const int position, const T& value){
 	}
 }
 
+//This method displays the data in the front/first node
+template<typename T>
+T linkedList<T>::displayFront(){
+	//if the list is empty, throw an error
+	if (count == 0){
+		throw 1;
+	}
+	else{
+		//return the data from the front node
+		return front->data;
+	}
+}
+
+//This method displays the data in the end/last node
+template<typename T>
+T linkedList<T>::displayEnd(){
+	//If the list is empty, throw an error
+	if (count == 0){
+		throw 1;
+	}
+	else{
+		//return the data from the last node
+		return end->data;
+	}
+}
+
+//returns the value of a node at a specific index
 template <typename T>
-T linkedList<T>::displayValue(const int position){
+T linkedList<T>::displayValueAt(const int position){
 	//If the index doesn't exist throw an error
+	//Count allows this method to also throw errors if the list is empty
 	if (position < 0 || position > count){
 		throw 1;
 	}//If the index is correct loop to the correct location and retrieve the information.
@@ -215,16 +258,93 @@ T linkedList<T>::displayValue(const int position){
 //This overloads the square brackets so we can access information in the linked list like this: myLinkedList[4];
 template<typename T>
 T linkedList<T>::operator[](const int position){
-	return displayValue(position);
+	return displayValueAt(position);
+}
+
+//delete the front/first node
+template<typename T>
+void linkedList<T>::removeFront(){
+	//If the linked list is empty do nothing
+	if (count == 0){
+		return;
+	}//If the linked list has one node it becomes empty
+	else if(front == end){
+		//delete the first/front node
+		delete front;
+		//set the front/first pointer to null
+		front = 0;
+		//set the last/end pointer to null
+		end = 0;
+		//decrement the counter back to 0
+		count--;
+		//exit the method since we're done
+		return;
+	}//Default scenario
+	else{
+		//create a pointer to track the first node so we can delete it
+		node<T>* currentNode = front;
+		//update the front pointer to point to the next node since we're deleting the first one
+		front = front->next;
+		//delete the first node
+		delete currentNode;
+		//update the currentNode pointer to be null
+		currentNode = 0;
+		//update the count so it knows we have one less node
+		count--;
+	}
 }
 
 template<typename T>
-void linkedList<T>::remove(const int position){
-	//If they try to remove a node that is out of bounds then do nothing
+void linkedList<T>::removeEnd(){
+	//If the linked list is empty do nothing
+	if (count == 0){
+		return;
+	}//If the linked list has one node it becomes empty
+	else if (front == end){
+		//delete the first/front node
+		delete front;
+		//set the front/first pointer to null
+		front = 0;
+		//set the last/end pointer to null
+		end = 0;
+		//decrement the counter back to 0
+		count--;
+		//exit the method since we're done
+		return;
+	}//Default scenario
+	else{
+		//This pointer will be used to track the current node we're on
+		node<T>* currentNode = front;
+		//this pointer will be used to track the node behind the node we're currently on.
+		//It's initially set to null
+		node<T>* previousNode = 0;
+		//This loop gets us to the last node and positions the previousNode pointer to the second to last node
+		while (currentNode->next != 0){
+			//update the previousNode pointer to be equal to the currentNode pointer
+			previousNode = currentNode;
+			//After updating the previousNode pointer mode the currentNode pointer forward one node
+			currentNode = currentNode->next;
+		}
+		//Since the previousNode pointer is poointing to the new LAST/END node we update the "next" pointer to be null
+		previousNode->next = 0;
+		//We delete the last node
+		delete currentNode;
+		//after deleting the last node we update the "end" pointer in our linked list to point to the new last node
+		end = previousNode;
+		//Update the "count" so that it knows we have one less node
+		count--;
+		//exit the method
+		return;
+	}
+}
+
+template<typename T>
+void linkedList<T>::removeAt(const int position){
+	//If they try to removeAt a node that is out of bounds then do nothing
 	if (position < 0 || position > count){
 		//return exits the method without doing anything
 		return;
-	}//If they try to remove a node and the first pointer is null (the linked list is empty) then do nothing
+	}//If they try to removeAt a node and the first pointer is null (the linked list is empty) then do nothing
 	else if (front == 0){
 		//return exists the method without doing anything
 		return;
@@ -240,7 +360,7 @@ void linkedList<T>::remove(const int position){
 		count--;
 		//exit the method since we're done
 		return;
-	}//If they try to remove the last node
+	}//If they try to removeAt the last node
 	else if (position == count){
 		//This pointer will be used to track the current node we're on
 		node<T>* currentNode = front;
@@ -264,7 +384,7 @@ void linkedList<T>::remove(const int position){
 		count--;
 		//exit the method
 		return;
-	}//If they try to remove the first node
+	}//If they try to removeAt the first node
 	else if (position == 0){
 		//create a pointer to track the first node so we can delete it
 		node<T>* currentNode = front;
@@ -305,7 +425,7 @@ void linkedList<T>::remove(const int position){
 
 //searches the linked list and outputs a message confirming or denying 
 template<typename T>
-void linkedList<T>::find(T value){
+bool linkedList<T>::checkFor(T value){
 	//this node pointer will enable to go through the list
 	node<T>* temp;
 	//update the pointer to the first node
@@ -314,14 +434,15 @@ void linkedList<T>::find(T value){
 	for (int i = 0; i < count; i++){
 		//If we find the matching data output which node it's in and exit the method
 		if (temp->data == value){
-			cout << "The value of " << value << " is in node " << i << endl;
-			return;
+			//cout << "The value of " << value << " is in node " << i << endl;
+			return true;
 		}//If we don't find the matching data at this node move to the next one
 		else{
 			temp = temp->next;
 		}
 	}//If there is no matching node inform the user.
-	cout << "Unfortunately the linked list does not contain " << value << "." << endl;
+	//cout << "Unfortunately the linked list does not contain " << value << "." << endl;
+	return false;
 }
 
 //A method that displays all the contents of the list
@@ -352,18 +473,30 @@ int main(){
 	myLinkedList.addAt(2, 10);
 	//enumerate displays all the contents of our linked list
 	myLinkedList.enumerate();
-	cout << myLinkedList.displayValue(0) << endl;
+	cout << myLinkedList.displayValueAt(0) << endl;
 	cout << myLinkedList[0] << endl;;
 	//linked list checks and confirms that the linked list contains 15
-	myLinkedList.find(15);
+	cout << "Does the linked list contain 15? " << myLinkedList.checkFor(15) << endl;
 	//linked list checks and denies that the linked list contains 64
-	myLinkedList.find(64);
+	cout << "Does the linked list contain 64? " << myLinkedList.checkFor(64) << endl;
 	//removing 10, the linked list should now read 19->17->15->5
-	myLinkedList.remove(2);
+	myLinkedList.removeAt(2);
 	//This one will do nothing since -1 isn't a valid index
-	myLinkedList.remove(-1);
+	myLinkedList.removeAt(-1);
 	//This one will do nothing since 15 isn't a valid index
-	myLinkedList.remove(15);
+	myLinkedList.removeAt(15);
+	myLinkedList.enumerate();
+	myLinkedList.addFront(3);
+	myLinkedList.addFront(2);
+	myLinkedList.addFront(1);
+	myLinkedList.enumerate();
+	myLinkedList.addEnd(1);
+	myLinkedList.addEnd(2);
+	myLinkedList.addEnd(3);
+	myLinkedList.enumerate();
+	cout << "Front node is: " << myLinkedList.displayFront() << " and end node is: " << myLinkedList.displayEnd() << endl;
+	myLinkedList.removeFront();
+	myLinkedList.removeEnd();
 	myLinkedList.enumerate();
 
 	//destructor frees up the memory that was used by our nodes in the linked list
