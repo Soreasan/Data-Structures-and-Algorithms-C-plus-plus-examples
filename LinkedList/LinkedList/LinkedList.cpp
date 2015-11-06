@@ -501,6 +501,8 @@ int main(){
 
 	//destructor frees up the memory that was used by our nodes in the linked list
 	myLinkedList.~linkedList();
+	linkedList<int> myLinkedList2;
+	myLinkedList2[2];
 	_getch();
 	return 0;
 }
